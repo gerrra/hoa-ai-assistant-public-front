@@ -6,8 +6,6 @@ export default function PublicWidget(){
   const [question, setQ] = useState('')
   const [role, setRole] = useState<'resident'|'board'|'staff'>('resident')
   const [communityId, setCid] = useState(1)
-  const [answer, setAnswer] = useState('')
-  const [sources, setSources] = useState<any[]>([])
   const [status, setStatus] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   
@@ -15,23 +13,23 @@ export default function PublicWidget(){
 
   const onAsk = async () => {
     if(!question.trim()) { setStatus('Введите вопрос'); return }
+    
+    const currentQuestion = question.trim()
+    setQ('') // Clear input immediately
     setIsLoading(true)
-    setStatus('Думаю…'); setAnswer(''); setSources([])
+    setStatus('Думаю…')
     
     // Add user message to history
     addMessage({
       id: Date.now(),
       role: 'user',
-      content: question,
+      content: currentQuestion,
       created_at: new Date().toISOString(),
       meta: { community_id: communityId, role }
     })
     
     try{
-      const data = await askQuestion(question, { community_id: communityId, role })
-      setAnswer(data.answer || '')
-      setSources(Array.isArray(data.sources)? data.sources : [])
-      setStatus(`Готово • confidence ${(Number(data.confidence)||0).toFixed(3)}`)
+      const data = await askQuestion(currentQuestion, { community_id: communityId, role })
       
       // Add AI response to history
       addMessage({
@@ -41,6 +39,8 @@ export default function PublicWidget(){
         created_at: new Date().toISOString(),
         meta: { sources: data.sources, confidence: data.confidence }
       })
+      
+      setStatus(`Готово • confidence ${(Number(data.confidence)||0).toFixed(3)}`)
       
       // Refresh messages to get latest from server
       if (conversationId) {
@@ -108,20 +108,6 @@ export default function PublicWidget(){
             )}
           </div>
         ))}
-
-        {/* Current Answer */}
-        {answer && (
-          <div className="message ai-message">
-            <div className="message-content">
-              {answer}
-            </div>
-            {!!sources.length && (
-              <div className="sources">
-                <strong>Источники:</strong> {sources.map((s,i)=>`${s.title}${s.section? ' — ' + s.section : ''}`).join('; ')}
-              </div>
-            )}
-          </div>
-        )}
 
         {isLoading && (
           <div className="message ai-message">
