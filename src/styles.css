@@ -104,6 +104,13 @@ body {
   min-height: 0;
   /* Ensure we can scroll to the very top */
   padding: 0;
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.chat-area::-webkit-scrollbar {
+  display: none; /* WebKit browsers (Chrome, Safari, Edge) */
 }
 
 .welcome-message {
