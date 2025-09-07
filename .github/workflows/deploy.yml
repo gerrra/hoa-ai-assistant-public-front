@@ -1,0 +1,56 @@
+name: Deploy public frontend to prod
+
+on:
+  push: { branches: [ main ] }
+  workflow_dispatch: {}
+
+concurrency: { group: deploy-public, cancel-in-progress: true }
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check secrets
+        run: |
+          test -n "${{ secrets.SSH_HOST }}" || { echo "SSH_HOST empty"; exit 1; }
+          test -n "${{ secrets.SSH_USER }}" || { echo "SSH_USER empty"; exit 1; }
+          test -n "${{ secrets.SSH_KEY }}"  || { echo "SSH_KEY empty";  exit 1; }
+
+      - name: Start ssh-agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Add known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "${{ secrets.SSH_PORT || 22 }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy over SSH
+        env:
+          HOST: ${{ secrets.SSH_HOST }}
+          USER: ${{ secrets.SSH_USER }}
+          PORT: ${{ secrets.SSH_PORT || 22 }}
+        run: |
+          ssh -o StrictHostKeyChecking=yes -p "$PORT" "$USER@$HOST" bash -s <<'SSH'
+          set -euo pipefail
+
+          # код паблика
+          if [ -d /opt/hoa-assistant/public-front/.git ]; then
+            cd /opt/hoa-assistant/public-front && git fetch --all && git reset --hard origin/main
+          else
+            mkdir -p /opt/hoa-assistant
+            git clone git@github.com:gerrra/hoa-ai-assistant-public-front.git /opt/hoa-assistant/public-front
+          fi
+
+          # сборка и рестарт только app сервиса
+          cd /opt/hoa-assistant/deploy/prod
+          docker compose -f docker-compose.prod.yml build app
+          docker compose -f docker-compose.prod.yml up -d app
+
+          # ждём, пока откроется HTTPS
+          for i in {1..30}; do
+            if curl -fsS -I https://app.gerrra.com >/dev/null 2>&1; then
+              echo "public up"; break; fi; sleep 3;
+          done
+          SSH
