@@ -122,6 +122,13 @@ export default function PublicWidget(){
         )}
       </div>
 
+      {/* Status Area */}
+      {status && (
+        <div className="status-area">
+          <div className="status-message">{status}</div>
+        </div>
+      )}
+
       {/* Input Area */}
       <div className="input-area">
         <div className="input-container">
@@ -145,7 +152,6 @@ export default function PublicWidget(){
             </button>
           </div>
         </div>
-        {status && <div className="status-message">{status}</div>}
       </div>
     </div>
   )

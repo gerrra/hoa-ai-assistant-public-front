@@ -99,17 +99,18 @@ body {
 .chat-area {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   min-height: 0;
+  /* Ensure we can scroll to the very top */
+  padding: 0;
 }
 
 .welcome-message {
   text-align: center;
   max-width: 600px;
-  margin: 0 auto;
+  margin: 24px auto 0;
+  padding: 24px;
 }
 
 .welcome-message h2 {
@@ -125,10 +126,25 @@ body {
   margin: 0;
 }
 
+/* Status Area */
+.status-area {
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border);
+  padding: 8px 24px;
+  text-align: center;
+}
+
+.status-message {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
 /* Messages */
 .message {
-  margin-bottom: 24px;
+  margin: 12px 0;
   max-width: 100%;
+  padding: 0 24px;
 }
 
 .message-content {
@@ -280,12 +296,6 @@ body {
   height: 16px;
 }
 
-.status-message {
-  text-align: center;
-  margin-top: 12px;
-  font-size: 14px;
-  color: var(--text-secondary);
-}
 
 /* Responsive Design */
 @media (max-width: 768px) {
