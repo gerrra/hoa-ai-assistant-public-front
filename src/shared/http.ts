@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const envBase = import.meta.env.VITE_API_BASE?.replace(/\/+$/, "");
-const fallbackBase = window.location.origin.replace(/^https?:\/\/app\./, (m) => m.replace("app.","api."));
+const envBase = import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/,"");
+const fallbackBase = window.location.origin.replace(/^https?:\/\/app\./, (m)=>m.replace("app.","api."));
 const baseURL = envBase || fallbackBase;
 
 export function joinPath(...parts: string[]) {
@@ -14,7 +14,7 @@ export function joinPath(...parts: string[]) {
 
 export const api = axios.create({
   baseURL,
-  withCredentials: false,             // public doesn't use cookies
+  withCredentials: true,              // we need cookie 'sid'
   headers: { "Content-Type": "application/json" },
   timeout: 20000,
 });

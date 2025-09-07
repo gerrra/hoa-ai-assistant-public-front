@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { ask } from '../lib/api'
+import { askQuestion } from '../lib/api'
+import { useChatHistory } from '../hooks/useChatHistory'
 
 export default function PublicWidget(){
   const [question, setQ] = useState('')
@@ -9,17 +10,46 @@ export default function PublicWidget(){
   const [sources, setSources] = useState<any[]>([])
   const [status, setStatus] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  
+  const { messages, addMessage, refreshMessages, conversationId } = useChatHistory()
 
   const onAsk = async () => {
     if(!question.trim()) { setStatus('Введите вопрос'); return }
     setIsLoading(true)
     setStatus('Думаю…'); setAnswer(''); setSources([])
+    
+    // Add user message to history
+    addMessage({
+      id: Date.now(),
+      role: 'user',
+      content: question,
+      created_at: new Date().toISOString(),
+      meta: { community_id: communityId, role }
+    })
+    
     try{
-      const data = await ask({ community_id: communityId, role, question })
+      const data = await askQuestion(question, { community_id: communityId, role })
       setAnswer(data.answer || '')
       setSources(Array.isArray(data.sources)? data.sources : [])
       setStatus(`Готово • confidence ${(Number(data.confidence)||0).toFixed(3)}`)
-    }catch(e:any){ setStatus('Ошибка запроса'); }
+      
+      // Add AI response to history
+      addMessage({
+        id: Date.now() + 1,
+        role: 'assistant',
+        content: data.answer || '',
+        created_at: new Date().toISOString(),
+        meta: { sources: data.sources, confidence: data.confidence }
+      })
+      
+      // Refresh messages to get latest from server
+      if (conversationId) {
+        await refreshMessages(conversationId)
+      }
+    }catch(e:any){ 
+      setStatus('Ошибка запроса')
+      console.error('Ask error:', e)
+    }
     finally {
       setIsLoading(false)
     }
@@ -58,14 +88,28 @@ export default function PublicWidget(){
 
       {/* Chat Area */}
       <div className="chat-area">
-        {!answer && !isLoading && (
+        {messages.length === 0 && !isLoading && (
           <div className="welcome-message">
             <h2>Что у тебя сегодня на уме?</h2>
             <p>Задайте вопрос по документам сообщества</p>
           </div>
         )}
 
-        {/* Messages */}
+        {/* Chat History */}
+        {messages.map((msg, index) => (
+          <div key={msg.id} className={`message ${msg.role === 'user' ? 'user-message' : 'ai-message'}`}>
+            <div className="message-content">
+              {msg.content}
+            </div>
+            {msg.meta?.sources && msg.meta.sources.length > 0 && (
+              <div className="sources">
+                <strong>Источники:</strong> {msg.meta.sources.map((s:any,i:number)=>`${s.title}${s.section? ' — ' + s.section : ''}`).join('; ')}
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* Current Answer */}
         {answer && (
           <div className="message ai-message">
             <div className="message-content">

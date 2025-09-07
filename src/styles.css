@@ -146,6 +146,13 @@ body {
   background: var(--bg-secondary);
 }
 
+.user-message .message-content {
+  background: var(--accent);
+  color: white;
+  margin-left: auto;
+  max-width: 80%;
+}
+
 .sources {
   margin-top: 12px;
   padding-top: 12px;
