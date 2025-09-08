@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { askQuestion } from '../lib/api'
 import { useChatHistory } from '../hooks/useChatHistory'
+import SourcesList from '../components/SourcesList'
 
 export default function PublicWidget(){
   const [question, setQ] = useState('')
@@ -101,10 +102,8 @@ export default function PublicWidget(){
             <div className="message-content">
               {msg.content}
             </div>
-            {msg.meta?.sources && msg.meta.sources.length > 0 && (
-              <div className="sources">
-                <strong>Источники:</strong> {msg.meta.sources.map((s:any,i:number)=>`${s.title}${s.section? ' — ' + s.section : ''}`).join('; ')}
-              </div>
+            {msg.role === 'assistant' && msg.meta?.sources && msg.meta.sources.length > 0 && (
+              <SourcesList items={msg.meta.sources} />
             )}
           </div>
         ))}

@@ -188,6 +188,67 @@ body {
   color: var(--text-primary);
 }
 
+/* Sources List Component */
+.sources-list {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.sources-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.sources-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sources-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.sources-item-title {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.sources-pages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sources-page-link,
+.sources-doc-link {
+  color: var(--accent);
+  text-decoration: none;
+  padding: 4px 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.sources-page-link:hover,
+.sources-doc-link:hover {
+  background: var(--accent);
+  color: white;
+  text-decoration: none;
+}
+
 /* Typing Indicator */
 .typing-indicator {
   display: flex;
