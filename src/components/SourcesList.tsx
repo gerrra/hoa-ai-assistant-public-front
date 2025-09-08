@@ -8,34 +8,38 @@ export default function SourcesList({ items }: Props) {
   if (!items || items.length === 0) return null;
   return (
     <div className="sources-list">
-      <div className="sources-title">Источники</div>
-      <ul className="sources-items">
+      <span className="sources-title">Источники:</span>
+      <span className="sources-links">
         {items.map((s, i) => (
-          <li key={i} className="sources-item">
-            <div className="sources-item-title">{s.title}</div>
+          <React.Fragment key={i}>
             {s.pages && s.pages.length > 0 ? (
-              <div className="sources-pages">
-                {s.pages.map((p, idx) => (
-                  <a
-                    key={idx}
-                    href={s.links?.[idx] || s.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="sources-page-link"
-                    title={`Стр. ${p}`}
-                  >
-                    стр. {p}
-                  </a>
-                ))}
-              </div>
+              s.pages.map((p, idx) => (
+                <a
+                  key={`${i}-${idx}`}
+                  href={s.links?.[idx] || s.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="sources-link"
+                  title={`${s.title} - стр. ${p}`}
+                >
+                  {s.title} (стр. {p})
+                </a>
+              ))
             ) : (
-              <a href={s.url} target="_blank" rel="noreferrer" className="sources-doc-link">
-                открыть
+              <a
+                href={s.url}
+                target="_blank"
+                rel="noreferrer"
+                className="sources-link"
+                title={s.title}
+              >
+                {s.title}
               </a>
             )}
-          </li>
+            {i < items.length - 1 && <span className="sources-separator">; </span>}
+          </React.Fragment>
         ))}
-      </ul>
+      </span>
     </div>
   );
 }

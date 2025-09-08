@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { askQuestion } from '../lib/api'
 import { useChatHistory } from '../hooks/useChatHistory'
 import SourcesList from '../components/SourcesList'
@@ -11,6 +11,18 @@ export default function PublicWidget(){
   const [isLoading, setIsLoading] = useState(false)
   
   const { messages, addMessage, refreshMessages, conversationId } = useChatHistory()
+  const chatAreaRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to bottom when messages change
+  const scrollToBottom = () => {
+    if (chatAreaRef.current) {
+      chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight
+    }
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, isLoading])
 
   const onAsk = async () => {
     if(!question.trim()) { setStatus('Введите вопрос'); return }
@@ -29,6 +41,9 @@ export default function PublicWidget(){
       meta: { community_id: communityId, role }
     })
     
+    // Scroll to bottom after adding user message
+    setTimeout(scrollToBottom, 100)
+    
     try{
       const data = await askQuestion(currentQuestion, { community_id: communityId, role })
       
@@ -42,6 +57,9 @@ export default function PublicWidget(){
       })
       
       setStatus(`Готово • confidence ${(Number(data.confidence)||0).toFixed(3)}`)
+      
+      // Scroll to bottom after adding AI response
+      setTimeout(scrollToBottom, 100)
       
       // Refresh messages to get latest from server
       if (conversationId) {
@@ -88,7 +106,7 @@ export default function PublicWidget(){
       </div>
 
       {/* Chat Area */}
-      <div className="chat-area">
+      <div className="chat-area" ref={chatAreaRef}>
         {messages.length === 0 && !isLoading && (
           <div className="welcome-message">
             <h2>Что у тебя сегодня на уме?</h2>
