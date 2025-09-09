@@ -2,7 +2,16 @@ import axios from "axios";
 
 const envBase = import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/,"");
 const fallbackBase = window.location.origin.replace(/^https?:\/\/app\./, (m)=>m.replace("app.","api."));
-const baseURL = envBase || fallbackBase;
+// For local development, use localhost:8000 as fallback
+const localFallback = window.location.hostname === 'localhost' ? 'http://localhost:8000' : fallbackBase;
+const baseURL = envBase || localFallback;
+
+console.log('API Configuration:', {
+  envBase,
+  fallbackBase,
+  finalBaseURL: baseURL,
+  currentOrigin: window.location.origin
+});
 
 export function joinPath(...parts: string[]) {
   return parts
